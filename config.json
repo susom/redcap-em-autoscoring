@@ -1,64 +1,74 @@
 {
-	"name": "ClassNameHere",
+  "name": "Autoscore",
 
-	"namespace": "Stanford\\ClassNameHere",
+  "namespace":"Stanford\\Autoscore",
 
-	"description": "A template for a REDCap External Module",
+  "description": "REDCap Autoscore processing",
 
-	"documentation": "README.md",
+  "authors": [
+    {
+      "name": "Andy Martin",
+      "email": "andy123@stanford.edu",
+      "institution": "Stanford University"
+    },
+    {
+      "name": "Lee Ann Yasukawa",
+      "email": "yasukawa@stanford.edu",
+      "institution": "Stanford University"
+    }
+  ],
 
-	"authors": [
-		{
-			"name": "Andrew Martin",
-			"email": "andy123@stanford.edu",
-			"institution": "Stanford University"
-		}
-	],
+  "permissions": [
+    "redcap_save_record"
+  ],
 
-	"permissions": [
-		"redcap_module_system_enable",
-		"redcap_module_project_enable",
-		"redcap_module_save_configuration"
-	],
-	
-	"enable-every-page-hooks-on-system-pages": false,	
+  "links": {
+    "control-center": [
+    ],
+    "project": [
+    ]
+  },
 
-	"links": {
-		"project": [
-
-		],
-		"control-center": [
-
-		]
-	},
-
-	"no-auth-pages": [
-
-	],
-
-	"project-settings": [
-		{
-			"key": "enable-project-debug-logging",
-			"name": "<b>Enable Debug Logging</b><br><i>(optional)</i> Requires installation and configuration of emLogger",
-			"required": false,
-			"type": "checkbox"
-		}
-	],
-
-
-	"system-settings": [
-		{
-			"key": "enable-system-debug-logging",
-			"name": "<b>Enable Debug Logging (system-wide)</b><i>(optional)</i> Requires installation and configuration of emLogger",
-			"required": false,
-			"type": "checkbox"
-		}
-	],
-
-	"compatibility": {
-		"php-version-min": "",
-		"php-version-max": "",
-		"redcap-version-min": "",
-		"redcap-version-max": ""
-	}
+  "system-settings": [
+    {
+      "key": "autoscore-project",
+      "name": "<b>Select the autoscore configuration project</b>",
+      "required": true,
+      "type": "project-id"
+    }
+  ],
+  "project-settings": [
+      {
+        "key": "enable-project-debug-logging",
+        "name": "<b>Enable Debug Logging</b>",
+        "required": false,
+        "type": "checkbox"
+      },
+      {
+        "key": "algorithms",
+        "name": "<h6><span class='text-lg badge badge-lg badge-success'>Select algorithms</span></h6>Select which algorithms you would like to use in your project.  Each algorithm should have its own configuration setup.",
+        "type": "sub_settings",
+        "repeatable": true,
+        "sub_settings": [
+            {
+              "key": "autoscore-name",
+              "name": "<b>Select the algorithm you would like to use</b>",
+              "required": true,
+              "type": "text"
+            },
+            {
+              "key": "config-id",
+              "name": "<b>Enter the config id for this scoring algorithm from the Autoscore Setup project</b>",
+              "required": true,
+              "type": "text"
+            },
+            {
+              "key": "form-name",
+              "name": "<b>Select the form which will run the scoring algorithm when saved</b>",
+              "required": true,
+              "type": "form-list"
+            }
+        ]
+      }
+  ]
 }
