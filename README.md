@@ -15,7 +15,7 @@ the autoscoring data necessary to run the algorithm.  Also, the result status of
 to this record which will provide some insight into scoring status.
 
 In addition to the record in the autoscoring configuration project, the configuration file for this External
-Module needs to be configured.  There are three entries that are needed for each autoscoring configuration: 1)
+Module needs to be configured in each project.  There are three entries that are needed for each autoscoring configuration: 1)
 Name of the Configuration, 2) Record ID of the Master Scoring configuration project that holds the autoscoring
  information for this algorithm and 3) the form name, when saved, will initiate the autoscoring.
 
