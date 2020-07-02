@@ -35,7 +35,6 @@ $default_tscore = array();
 $default_perc = array();
 foreach ($categories as $c) {
 	array_push($default_raw, $prefix.$c);
-	array_push($default_raw, $prefix.$c);
     array_push($default_tscore, $prefix.$c."_tscore");
     array_push($default_perc, $prefix.$c."_perc");
 }
