@@ -2,9 +2,9 @@
 /**
 
 	SRS-2
-	
+
 	A REDCap AutoScoring Algorithm File
-	
+
 	- There exists an array called $src that contains the data from the source project
 	- There can exist an optional array called $manual_result_fields that can override the default_result_fields
 	- The final results should be presented in an array called $algorithm_results
@@ -138,7 +138,7 @@ foreach ($required_fields as $i => $field_name) {
 	} else {
 		// convert 1-4 to 0-3
 		$normalizedSource[$field_name] = $src[$field_name] -1;
-		$this->module->emDebugt("Question $i should be NOT reversed");
+		$this->module->emDebug("Question $i should be NOT reversed");
 	}
 }
 //$this->module->emDebug("SRC: " . $src);
@@ -168,7 +168,7 @@ foreach($groups as $name => $question_numbers) {
 	// Take the list of question numbers and get the field_names from the required_fields array
 	$question_fields = array_intersect_key($required_fields, array_flip($question_numbers));
 	//$this->module->emDebug("Question Fields: " . $question_fields);
-	
+
 	// Now, get the values from the normalizedSource using the field_names from above.
 	$src_groups[$name] = array_intersect_key($normalizedSource, array_flip($question_fields));
 }
@@ -177,7 +177,7 @@ foreach($groups as $name => $question_numbers) {
 
 # Calculate our Totals
 $result_values = array();
-foreach ($src_groups as $name => $data) {	
+foreach ($src_groups as $name => $data) {
 	$raw = array_sum($data);
 	$result_values[$name.'_raw'] = $raw;
 #	$this->module->emDebug("result name: $name and value: $raw");
