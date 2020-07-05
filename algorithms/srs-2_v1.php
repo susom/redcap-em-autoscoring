@@ -45,7 +45,7 @@ foreach ($categories as $c) {
 	array_push($tvalue_results, $prefix.$c."_tval");                // lookup tvalue
 }
 $default_result_fields = array_merge($raw_results, $tvalue_results);
-$this->module->emDebug("DRF: " . $default_result_fields);
+$this->module->emDebug("DRF: " . json_encode($default_result_fields));
 
 
 ### VALIDATION ###
@@ -65,14 +65,14 @@ if (!empty($manual_source_fields)) {
 	if (count($manual_source_fields) == count($default_required_fields)) {
 		foreach($manual_source_fields as $k => $field) {
 			if ($field) {	// Only replace non-empty field names (this allows someone to use ,,,newname,, in list)
-				$required_fields[$k] = $field;
+                $default_required_fields[$k] = $field;
 				//$this->module->emDebug("changing $k to $field");
 			}
 		}
 		$log[] = "Overriding required fields with ". implode(',',$manual_source_fields);
-		//$this->module->emDebug("Required Fields After: " . $required_fields);
+		//$this->module->emDebug("Required Fields After: " . $default_required_fields);
 	} else {
-		$msg = count($manual_source_fields) . " manual source fields specified, but the algorithm needs " . count($required_fields) . " fields.";
+		$msg = count($manual_source_fields) . " manual source fields specified, but the algorithm needs " . count($default_required_fields) . " fields.";
 		$this->module->emError($msg);
 		$algorithm_log[] = $msg;
 		return false;
@@ -99,18 +99,18 @@ if (!empty($manual_result_fields)) {
 
 # Test for presense of all required fields and report missing fields
 $source_fields = array_keys($src);
-$missing_fields = array_diff($required_fields, $source_fields);
+$missing_fields = array_diff($default_required_fields, $source_fields);
 if ($missing_fields) {
 	$msg = "Source project ($project_id) is trying to run the {$job['algorithm']} algorithm but is missing [" . implode(',',$missing_fields) . "]";
 	$algorithm_log[] = $msg;
 	$this->module->emError($msg);
-	$this->module->emDebug("Missing Fields: " . $missing_fields);
+	$this->module->emDebug("Missing Fields: " . json_encode($missing_fields));
 	return false;	//Since this is being called via include, the main script will continue to process other algorithms
 }
 
 # Check that all required fields have a value
 $null_fields = array();
-foreach ($required_fields as $rf) {
+foreach ($default_required_fields as $rf) {
 	if (empty($src[$rf]) && !is_numeric($src[$rf])) $null_fields[] = $rf;
 }
 if (!empty($null_fields)) {
@@ -127,22 +127,22 @@ if (!empty($null_fields)) {
 $reversedQuestions = array(3,7,11,12,15,17,21,22,26,32,38,40,43,45,48,52,55);
 $normalizedSource = array();	// This is an array to hold the source data converted to a 0-3 scale
 $gender = null;
-foreach ($required_fields as $i => $field_name) {
+foreach ($default_required_fields as $i => $field_name) {
 	//$this->module->emDebug("Key: $i, and value: $field_name, and src[fieldname]: $src[$field_name]");
-	if ($default_required_fields[$i] == "srs_sex") {
+	if ($i == 65) {
 		$gender = $src[$field_name];
 	} else if (in_array($i+1, $reversedQuestions,true)) {
 		// reverse (1=>3, 2=>2, 3=>1, 4=>0)
 		$normalizedSource[$field_name] = (($src[$field_name] * -1) + 4);
-		$this->module->emDebug("Question $i should be reversed");
+		//$this->module->emDebug("Question $i should be reversed");
 	} else {
 		// convert 1-4 to 0-3
 		$normalizedSource[$field_name] = $src[$field_name] -1;
-		$this->module->emDebug("Question $i should be NOT reversed");
+		//$this->module->emDebug("Question $i should be NOT reversed");
 	}
 }
 //$this->module->emDebug("SRC: " . $src);
-$this->module->emDebug("NSRC: " . $normalizedSource);
+$this->module->emDebug("NSRC: " . json_encode($normalizedSource));
 
 // Create groups for scoring
 $groups = array(
@@ -154,7 +154,7 @@ $groups = array(
 );
 $groups['sci'] = array_values(array_diff(range(1,65),$groups['rrb']));
 $groups['total'] = range(1,65);
-$this->module->emDebug("GROUPS: " . $groups);
+$this->module->emDebug("GROUPS: " . json_encode($groups));
 
 # Next, we go through each group and substitute in the actual source data for each question
 # When this is done, we have an array where the key is each group and the elemnts are an array of
@@ -162,11 +162,11 @@ $this->module->emDebug("GROUPS: " . $groups);
 // [rbs_sub3] => Array ([rbs_15] => 3,[rbs_16] => 3,[rbs_17] => 3, ...),
 // [rbs_sub4] => Array (...)
 // Since our required_fields array is indexed at 0 (so question 1 is at 0, I need to add a dummy value to do the alignment)
-array_unshift($required_fields, 'dummy_value');
+array_unshift($default_required_fields, 'dummy_value');
 $src_groups = array();
 foreach($groups as $name => $question_numbers) {
 	// Take the list of question numbers and get the field_names from the required_fields array
-	$question_fields = array_intersect_key($required_fields, array_flip($question_numbers));
+	$question_fields = array_intersect_key($default_required_fields, array_flip($question_numbers));
 	//$this->module->emDebug("Question Fields: " . $question_fields);
 
 	// Now, get the values from the normalizedSource using the field_names from above.
@@ -192,6 +192,7 @@ if ($gender == 1) {
 } else if ($gender == 2) {
 	$filename = $dataPath . "SRS-2_v1_female.csv";
 }
+$this->module->emDebug(" Filename: " . $filename);
 
 if (!empty($filename)) {
 	$readFile = new ReadCSVFileClass();
@@ -221,8 +222,11 @@ foreach($categories as $category => $value) {
 
 # REQUIRED: The algorithm_results variable MUST BE USED as it is relied upon from the parent script.
 $tot_result_values = array_merge($result_values, $tval_values);
+$this->module->emDebug("Raw Results: " . json_encode($result_values));
+$this->module->emDebug("Tval Results: " . json_encode($tval_values));
+$this->module->emDebug("Total Results: " . json_encode($tot_result_values));
 $algorithm_results = array_combine($default_result_fields, $tot_result_values);
-$this->module->emDebug("AR: " . $algorithm_results);
+$this->module->emDebug("AR: " . json_encode($algorithm_results));
 
 # Append result field for algorithm log if specified via the log_field variable in the config project
 # Because we aren't pulling the entire data dictionary, we can't confirm whether or not the field actually exists
