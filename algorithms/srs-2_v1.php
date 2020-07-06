@@ -16,7 +16,7 @@ use Stanford\Autoscore\ReadCSVFileClass;
 require_once $this->module->getModulePath() . "classes/readCSVFileClass.php";
 
 # REQUIRED: Summarize this algorithm
-$algorithm_summary = "SRS-2 School-Age.  This algorithm calculates the RAW scores.  It assumes the questions are coded as 1-4 for all questions.  The algorithm handles reversing the scoring on certain questions. Tvalues are looked up based on the raw scores.";
+$algorithm_summary = "Social Responsiveness Scale-2 School-Age.  This algorithm calculates the RAW scores.  It assumes the questions are coded as 1-4 for all questions.  The algorithm handles reversing the scoring on certain questions. Tvalues are looked up based on the raw scores.";
 
 # REQUIRED: Define an array of fields that must be present for this algorithm to run
 $prefix = 'srs_';
