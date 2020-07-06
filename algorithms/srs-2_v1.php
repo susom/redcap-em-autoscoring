@@ -26,7 +26,7 @@ foreach (range(1,65) as $i) {
 	array_push($default_required_fields, $prefix.$i);
 }
 array_push($default_required_fields, "srs_sex");
-
+$required_fields = $default_required_fields;
 
 # REQUIRED: Define $default_result_fields array of default result field_names to record the summary data
 $categories = array(
