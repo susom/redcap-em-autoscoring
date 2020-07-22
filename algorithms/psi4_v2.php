@@ -2,9 +2,9 @@
 /**
 
 	PSI4
-	
+
 	A REDCap AutoScoring Algorithm File
-	
+
 	- There exists an array called $src that contains the data from the source project
 	- There can exist an optional array called $manual_result_fields that can override the default_result_fields
 	- The final results should be presented in an array called $algorithm_results
@@ -59,7 +59,7 @@ foreach ($categories as $c) {
 }
 array_push($tval_fields, $prefix."defensive_significant");
 $default_result_fields = array_merge($raw_fields, $perc_fields, $tval_fields);
-$this->module->emDebug("DRF: " . $default_result_fields);
+$this->module->emDebug("DRF: " . json_encode($default_result_fields));
 
 
 ### VALIDATION ###
@@ -132,15 +132,9 @@ if (!empty($null_fields)) {
 	return false;  // prevent scoring during partial submissions (section breaks)
 }
 
-// check that the age is within limits of 4-12 yr old
 $key_index = array_search('age', $default_required_fields);
 $age = intval(floor($src[$required_fields[$key_index]]));
-if ($age < 4 || $age > 12) {
-	$msg = "Age ($age) must be between 4 and 12";
-	$algorithm_log[] = $msg;
-	$this->module->emError($msg);
-	return false;
-}
+$this->module->emDebug("Age: $age");
 
 
 ### IMPLEMENT SCORING ###
@@ -153,7 +147,7 @@ if ($age < 4 || $age > 12) {
 $standardQuestions = array(5,11,16,30,42,53,54,57,58,61,95,98);
 $main_set = array_merge(range(1,14), range(16,39), range(41,101));
 $reversedQuestions = array_values(array_diff($main_set,$standardQuestions));
-// Q15 is special!	
+// Q15 is special!
 // Q40 is special!
 
 $special_conv = array (1=>1,2=>2,3=>4,4=>5);
@@ -163,7 +157,7 @@ $normalizedSource = array();	// This is an array to hold the source data convert
 foreach ($required_fields as $i => $field_name) {
 	$i++;	// Add one to offset index starting at 0
 	if ($i == 15 || $i == 40) {
-		$normalizedSource[$field_name] = $special_conv[$src[$field_name]];		
+		$normalizedSource[$field_name] = $special_conv[$src[$field_name]];
 		//$this->module->emDebug("Question $i is special: ". $src[$field_name] . " => " . $normalizedSource[$field_name]);
 	} elseif (in_array($i, $reversedQuestions,true)) {
 		// reverse (1=>5, 2=>4, 3=>3, 4=>2, 5=>1)
@@ -173,7 +167,7 @@ foreach ($required_fields as $i => $field_name) {
 		$normalizedSource[$field_name] = $src[$field_name];
 		//$this->module->emDebug("Question $i should be NOT reversed: ". $src[$field_name] . " => " . $normalizedSource[$field_name]);
 	} elseif (filter_var($i,FILTER_VALIDATE_INT,array('options'=>array('min_range'=>102,'max_range'=>120)))) {
-		$normalizedSource[$field_name] = $src[$field_name] == 1 ? $special_conv2[$i] : 0;				
+		$normalizedSource[$field_name] = $src[$field_name] == 1 ? $special_conv2[$i] : 0;
 		//$this->module->emDebug("Question $i is special: ". $src[$field_name] . " => " . $normalizedSource[$field_name]);
 	} else {
 		$normalizedSource[$field_name] = $src[$field_name];
@@ -225,7 +219,7 @@ foreach($groups as $name => $question_numbers) {
 	// Take the list of question numbers and get the field_names from the required_fields array
 	$question_fields = array_intersect_key($required_fields, array_flip($question_numbers));
 	//$this->module->emDebug("Question Fields: " . $question_fields);
-	
+
 	// Now, get the values from the normalizedSource using the field_names from above.
 	$src_groups[$name] = array_intersect_key($normalizedSource, array_flip($question_fields));
 }
@@ -233,10 +227,10 @@ foreach($groups as $name => $question_numbers) {
 
 # Calculate our Totals
 $result_values = array();
-foreach ($src_groups as $name => $data) {	
+foreach ($src_groups as $name => $data) {
 	$raw = array_sum($data);
 //	list($std, $pct, $convmsg) = convert($name, $raw, $age, $sex);
-//	if ($convmsg) $algorithm_log[] = $convmsg;	
+//	if ($convmsg) $algorithm_log[] = $convmsg;
 	$result_values[$name.'_raw'] = $raw;
 }
 //$this->module->emDebug("DRF: " . $default_result_fields);
@@ -412,8 +406,8 @@ $perc_lookup_matrix = array(
 			array(20,20,14),array(19,19,11),array(18,18,10),array(17,17,9),array(16,16,4),array(13,15,"<=1")
 					),
 		'isolation' => array(							// isolation
-			array(22,30,">=99"),array(21,21,95),array(20,20,93),array(19,19,91),array(18,18,86),array(17,17,79), 
-			array(16,16,76),array(15,15,66),array(14,14,63),array(13,13,53),array(12,12,45),array(11,11,40), 
+			array(22,30,">=99"),array(21,21,95),array(20,20,93),array(19,19,91),array(18,18,86),array(17,17,79),
+			array(16,16,76),array(15,15,66),array(14,14,63),array(13,13,53),array(12,12,45),array(11,11,40),
 			array(10,10,35),array(9,9,28),array(8,8,19),array(7,7,14),array(6,6,6)
 					),
 		'attachment' => array(							// Attachment
@@ -2763,31 +2757,58 @@ function lookup_tables($raw_values, $lookup_matrix, $categories, $appendage) {
 			if ($found == false) {
 				$results[$category . $appendage] = null;
 				$this->module->emDebug("WARNING: Could not find a lookup value for category " . $category . " with raw value of " . $raw);
-			} 
+			}
 		}
 	}
 	return $results;
 
 }
 
-# We are not looking values for defensive response to take it out of the category array
-unset($categories[array_search('defensiveresponse',$categories)]);
+// Initialize defensive Significant to blank
 
-$results_perc = lookup_tables($result_values, $perc_lookup_matrix[$age], $categories, '_perc');
-$results_tval = lookup_tables($result_values, $tval_lookup_matrix[$age], $categories, '_tval');
+// check that the age is within limits of 4-12 yr old
+// Amy wants raw scores to calculate if age is out of range
+if ($age < 4 || $age > 12) {
+    $msg = "Age ($age) must be between 4 and 12 for t-scores";
+    $algorithm_log[] = $msg;
+    $this->module->emError($msg);
 
-$defensive_significant = null;
-$def_response = $result_values['defensiveresponse_raw'];
+    foreach ($categories as $c) {
+        if ($c === "defensiveresponse") {
+            // skip defensive response - no lookup tables
+        } else {
+            $results_perc[$c . "_perc"] = "";
+            $results_tval[$c . "_tval"] = "";
+        }
+    }
 
-# if the defensive response value is less than or equal to 24, the defensive significance is true.  Otherwise it is false.
-if (!empty($def_response)) {
-   $defensive_significant = ($def_response <= 24 ? 1 : 0);
+    $defensive_significant = "";
+    array_push($results_tval, $defensive_significant);
+} else {
+
+    # We are not looking values for defensive response to take it out of the category array
+    unset($categories[array_search('defensiveresponse', $categories)]);
+
+    $results_perc = lookup_tables($result_values, $perc_lookup_matrix[$age], $categories, '_perc');
+    $results_tval = lookup_tables($result_values, $tval_lookup_matrix[$age], $categories, '_tval');
+
+    $defensive_significant = null;
+    $def_response = $result_values['defensiveresponse_raw'];
+
+    # if the defensive response value is less than or equal to 24, the defensive significance is true.  Otherwise it is false.
+    if (!empty($def_response)) {
+        $defensive_significant = ($def_response <= 24 ? 1 : 0);
+    }
+    #$this->module->emDebug("defensive significance: " . $defensive_significant);
+
+    array_push($results_tval, $defensive_significant);
+    $this->module->emDebug("Results perc: " . json_encode($results_perc));
+    $this->module->emDebug("Results tval: " . json_encode($results_tval));
 }
-#$this->module->emDebug("defensive significance: " . $defensive_significant);
 
-array_push($results_tval, $defensive_significant);
 $results_total = array_merge($result_values, $results_perc, $results_tval);
-#$this->module->emDebug("All Results: " . implode(",", $results_total));
+$this->module->emDebug("All Results: " . implode(",", $results_total));
+
 
 ### DEFINE RESULTS ###
 
