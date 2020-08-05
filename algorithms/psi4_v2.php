@@ -2782,8 +2782,6 @@ if ($age < 4 || $age > 12) {
         }
     }
 
-    $defensive_significant = "";
-    array_push($results_tval, $defensive_significant);
 } else {
 
     # We are not looking values for defensive response to take it out of the category array
@@ -2791,20 +2789,21 @@ if ($age < 4 || $age > 12) {
 
     $results_perc = lookup_tables($result_values, $perc_lookup_matrix[$age], $categories, '_perc');
     $results_tval = lookup_tables($result_values, $tval_lookup_matrix[$age], $categories, '_tval');
-
-    $defensive_significant = null;
-    $def_response = $result_values['defensiveresponse_raw'];
-
-    # if the defensive response value is less than or equal to 24, the defensive significance is true.  Otherwise it is false.
-    if (!empty($def_response)) {
-        $defensive_significant = ($def_response <= 24 ? 1 : 0);
-    }
-    #$this->module->emDebug("defensive significance: " . $defensive_significant);
-
-    array_push($results_tval, $defensive_significant);
-    $this->module->emDebug("Results perc: " . json_encode($results_perc));
-    $this->module->emDebug("Results tval: " . json_encode($results_tval));
 }
+
+// Defensive Significance is valid whether or not the participant is within the acceptable age range
+$defensive_significant = null;
+$def_response = $result_values['defensiveresponse_raw'];
+
+# if the defensive response value is less than or equal to 24, the defensive significance is true.  Otherwise it is false.
+if (!empty($def_response)) {
+    $defensive_significant = ($def_response <= 24 ? 1 : 0);
+}
+$this->module->emDebug("defensive significance: " . $defensive_significant);
+
+array_push($results_tval, $defensive_significant);
+$this->module->emDebug("Results perc: " . json_encode($results_perc));
+$this->module->emDebug("Results tval: " . json_encode($results_tval));
 
 $results_total = array_merge($result_values, $results_perc, $results_tval);
 $this->module->emDebug("All Results: " . implode(",", $results_total));
