@@ -2,6 +2,7 @@
 namespace Stanford\Autoscore;
 
 use \Exception;
+use \REDCap;
 
 require_once "emLoggerTrait.php";
 require_once "classes/autoscoreAlgorithm.php";
@@ -18,6 +19,8 @@ class Autoscore extends \ExternalModules\AbstractExternalModule
     }
 
     public function redcap_save_record($project_id, $record = NULL,  $instrument,  $event_id,  $group_id = NULL,  $survey_hash = NULL,  $response_id = NULL, $repeat_instance) {
+
+        global $USERID;
 
         $setup_pid = $this->getSystemSetting('autoscore-project');
         $this->emDebug("In project " . $project_id);
@@ -40,22 +43,24 @@ class Autoscore extends \ExternalModules\AbstractExternalModule
 
         } else {
 
-            // This is not the setup project, so we are in a project that has been setup for autoscoring
-            // Retrieve the Reward configurations
-            $configs = $this->getSubSettings("algorithms");
-            foreach ($configs as $instance => $info) {
-                $setup_id = $info['config-id'];
-                $autoscore_form = $info['form-name'];
-                if ($autoscore_form == $instrument) {
-                    $this->emDebug("Record $record running algorithm " . json_encode($info));
-                    try {
-                        $as = new autoscoreAlgorithm($project_id, $record, $instrument, $event_id, $repeat_instance, $setup_pid, $setup_id, $this);
-                        $status = $as->runAlgorithm();
-                    } catch (Exception $ex) {
-                        $this->emError("Could not create class autoscoreAlgorithm - exception: " . $ex);
-                    }
-                }
-            }
+            // Find the event name from the event id
+            $event_name = REDCap::getEventNames(true, false, $event_id);
+            if ($event_name == false) $event_name = '';
+
+            // Package up the data and send to index.php
+            $autoscore_url = $this->getUrl("index.php", true, true) . "&pid=" . $project_id;
+            $autoscore_params = array(
+                            "project_id"            => $project_id,
+                            "username"              => $USERID,
+                            "instrument"            => $instrument,
+                            "record"                => $record,
+                            "repeat_instance"       => $repeat_instance,
+                            "redcap_event_name"     => $event_name
+                );
+            $this->emDebug("JSON parameter list: " . json_encode($autoscore_params));
+
+            $response = http_post($autoscore_url, $autoscore_params);
+            $this->emDebug("Return from http_post: " . json_encode($response));
 
         }
     }

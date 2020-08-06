@@ -26,8 +26,16 @@
     "control-center": [
     ],
     "project": [
+        {
+            "name": "Autoscore URL for use with MassDET",
+            "icon": "gear",
+            "url": "setup.php"
+        }
     ]
   },
+    "no-auth-pages": [
+        "index"
+    ],
 
   "system-settings": [
     {
