@@ -173,7 +173,7 @@ foreach ($required_fields as $i => $field_name) {
 		$normalizedSource[$field_name] = $src[$field_name];
         }
 }
-//$this->module->emDebug("SRC: " . $src);
+//$this->module->emDebug("SRC: " . json_encode($src));
 //$this->module->emDebug("NSRC: " . $normalizedSource);
 //echo "\n";
 //foreach ($src as $k => $v) {
@@ -223,7 +223,7 @@ foreach($groups as $name => $question_numbers) {
 	// Now, get the values from the normalizedSource using the field_names from above.
 	$src_groups[$name] = array_intersect_key($normalizedSource, array_flip($question_fields));
 }
-//$this->module->emDebug("SOURCE GROUPS: " . $src_groups);
+//$this->module->emDebug("SOURCE GROUPS: " . json_encode($src_groups));
 
 # Calculate our Totals
 $result_values = array();
@@ -234,7 +234,7 @@ foreach ($src_groups as $name => $data) {
 	$result_values[$name.'_raw'] = $raw;
 }
 //$this->module->emDebug("DRF: " . $default_result_fields);
-//$this->module->emDebug("RV: " . $result_values);
+//$this->module->emDebug("RV: " . json_encode($result_values));
 
 # Now that we have the raw scores, look up the percentiles and tvals from the raw scores.
 # These lookup values are based on age
@@ -2727,7 +2727,7 @@ $tval_lookup_matrix = array(
 		);
 
 
-function lookup_tables($raw_values, $lookup_matrix, $categories, $appendage) {
+function lookup_tables($raw_values, $lookup_matrix, $categories, $appendage, $module) {
 
 	$results = array();
 
@@ -2741,7 +2741,7 @@ function lookup_tables($raw_values, $lookup_matrix, $categories, $appendage) {
 			$found = false;
 			$category_matrix = $lookup_matrix[$category];
 			$raw = $raw_values[$category.'_raw'];
-			#$this->module->emDebug("raw value is ". $raw . ", and category is " . $category);
+			//$module->emDebug("raw value is ". $raw . ", and category is " . $category);
 			foreach ($category_matrix as $j) {
 				# The arrays are triplets with min raw_value first, then max raw_value next,
 				# then percentile or tvalue. This was easier to put
@@ -2749,14 +2749,14 @@ function lookup_tables($raw_values, $lookup_matrix, $categories, $appendage) {
 				if ($raw >= $j[0] and $raw <= $j[1]) {
 					$results[$category . $appendage] = $j[2];
 					$found = true;
-					#$this->module->emDebug(" category = " . $category . ", tvalue found = " . $results[$category]);
+					//$module->emDebug(" category = " . $category . ", tvalue found = " . $results[$category]);
 					break;
 				}
 
 			}
 			if ($found == false) {
 				$results[$category . $appendage] = null;
-				$this->module->emDebug("WARNING: Could not find a lookup value for category " . $category . " with raw value of " . $raw);
+				$module->emDebug("WARNING: Could not find a lookup value for category " . $category . " with raw value of " . $raw);
 			}
 		}
 	}
@@ -2786,9 +2786,8 @@ if ($age < 4 || $age > 12) {
 
     # We are not looking values for defensive response to take it out of the category array
     unset($categories[array_search('defensiveresponse', $categories)]);
-
-    $results_perc = lookup_tables($result_values, $perc_lookup_matrix[$age], $categories, '_perc');
-    $results_tval = lookup_tables($result_values, $tval_lookup_matrix[$age], $categories, '_tval');
+    $results_perc = lookup_tables($result_values, $perc_lookup_matrix[$age], $categories, '_perc', $this->module);
+    $results_tval = lookup_tables($result_values, $tval_lookup_matrix[$age], $categories, '_tval', $this->module);
 }
 
 // Defensive Significance is valid whether or not the participant is within the acceptable age range
