@@ -59,7 +59,8 @@ $defined_algorithms = array(
 	'stai'				=>  'stai_v1.php',
 	'prq'				=>  'basc3_prq_v1.php',
 	'scl90r'			=>  'scl90r_v1.php',
-	'brief_a'			=>  'brief_a_sr_v1.php'
+	'brief_a'			=>  'brief_a_sr_v1.php',
+    'ped_ds8a_v2'       =>  'promise_pds8a_v2.php'
 );
 
 ?>

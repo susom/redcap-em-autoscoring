@@ -23,16 +23,13 @@ class Autoscore extends \ExternalModules\AbstractExternalModule
         global $USERID;
 
         $setup_pid = $this->getSystemSetting('autoscore-project');
-        $this->emDebug("In project " . $project_id);
         if ($setup_pid == $project_id) {
 
             $this->emDebug("In setup project record $record");
             // First check to see if this is the Autoscore Setup Project.  If so, we are setting up a project
             // with an autoscoring config
             try {
-                $this->emDebug("Creating class autoscoreSetup");
                 $as = new autoscoreSetup($project_id, $record, $instrument, $event_id, $this);
-                $this->emDebug("Back from constructor");
                 $status = $as->storeSetup();
                 $this->emDebug("Back from storeSetup with status $status");
             } catch (Exception $ex) {
@@ -61,8 +58,8 @@ class Autoscore extends \ExternalModules\AbstractExternalModule
 
             $response = http_post($autoscore_url, $autoscore_params);
             $this->emDebug("Return from http_post: " . json_encode($response));
-
         }
+
     }
 
 }

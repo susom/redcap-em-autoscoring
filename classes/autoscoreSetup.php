@@ -45,7 +45,6 @@ class autoscoreSetup
 
         $status = true;
         $scoring_algorithm = $defined_algorithms[$this->algorithm];
-        $this->module->emDebug("In storeSetup: ");
 
         # Verify that scoring algorithm from config is defined
         if (empty($scoring_algorithm)) {
@@ -57,7 +56,7 @@ class autoscoreSetup
 
         # Verify that the scoring algorithm defined for the job actually exists
         if (!file_exists(CONFIG_ALGORITHM_PATH . $scoring_algorithm)) {
-            $msg = "Unable to find the algorithm file (" . CONFIG_ALGORITHM_PATH . $scoring_algorithm . ") for {" . $this->algorithm . "} 
+            $msg = "Unable to find the algorithm file (" . CONFIG_ALGORITHM_PATH . $scoring_algorithm . ") for {" . $this->algorithm . "}
 				as  defined in config.php.";
             $job_log[] = $msg;
             $this->module->emError($msg);
@@ -77,8 +76,11 @@ class autoscoreSetup
 
             // We need to be in project context to get the following data
             $form_list = $this->getDataDictionaryForms();
+            if (!empty($this->project_form)) {
+                $fields_in_form = $this->getFieldsInForm();
+            }
             $this->module->emDebug("Form List: " . json_encode($form_list));
-            $fields_in_form = $this->getFieldsInForm();
+            $this->module->emDebug("Project Form: " . json_encode($this->project_form));
             $this->module->emDebug("Fields in Form: " . json_encode($fields_in_form));
 
             // Save the data needed for setup
@@ -87,9 +89,10 @@ class autoscoreSetup
             $results['form_list']               = implode(', ', $form_list);
             $results['required_source_fields']  = implode(', ', $required_fields);
             $results['required_result_fields']  = implode(', ', $default_result_fields);
-            $results['fields_in_form']          = implode(', ', $fields_in_form);
+            if (!empty($this->project_form)) {
+                $results['fields_in_form'] = implode(', ', $fields_in_form);
+            }
             $data_to_save[$this->record][$this->event_id] = $results;
-            $this->module->emDebug("Data to save: " . json_encode($data_to_save));
             $response = REDCap::saveData($this->project_id, 'array', $data_to_save, 'overwrite');
             $this->module->emDebug("Response from save data: " . json_encode($response));
 
