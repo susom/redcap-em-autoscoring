@@ -1,12 +1,12 @@
 # Autoscoring
-This REDCap External Module will help projects automate scoring for assessments and will perform lookup table 
-values that are too complex for REDCap calculated fields. Each algorithm is created based on standard scoring 
+This REDCap External Module will help projects automate scoring for assessments and will perform lookup table
+values that are too complex for REDCap calculated fields. Each algorithm is created based on standard scoring
 calculations so each algorithm can be used for multiple projects.
 
 ## How it works
 Currently, each algorithm is created and a configuration is setup for each scoring instance. There is a master
 scoring configuration project which holds all the necessary information needed to perform the calculation.
-These scoring algorithms are called when an assessment form is saved and will perform the calculation and 
+These scoring algorithms are called when an assessment form is saved and will perform the calculation and
 automate saving the results in the project.
 
 ## Setup
@@ -20,3 +20,6 @@ Name of the Configuration, 2) Record ID of the Master Scoring configuration proj
  information for this algorithm and 3) the form name, when saved, will initiate the autoscoring.
 
 
+Last Update:
+
+June 15, 2023 - Add tables for ages 0-3 to PSIv4
