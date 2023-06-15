@@ -46,8 +46,8 @@ class ReadCSVFileClass
 						$num_elements = array_push($result[$result_hdrs[$ifield]], $csvData[$ifield]);
 					}
 
-				}				
-				
+				}
+
 				$nlines++;
 
 			}
@@ -60,7 +60,7 @@ class ReadCSVFileClass
 		//return the data from the file
 		return $result;
 	}
-	
+
 }
 
 ?>
