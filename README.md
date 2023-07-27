@@ -20,6 +20,8 @@ Name of the Configuration, 2) Record ID of the Master Scoring configuration proj
  information for this algorithm and 3) the form name, when saved, will initiate the autoscoring.
 
 
-Last Update:
+Change Log:
+
+July 27, 2023 - Added PSIv4 Short Form algorithm and lookup tables
 
 June 15, 2023 - Add tables for ages 0-3 to PSIv4
