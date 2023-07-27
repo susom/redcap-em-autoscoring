@@ -60,7 +60,8 @@ $defined_algorithms = array(
 	'prq'				=>  'basc3_prq_v1.php',
 	'scl90r'			=>  'scl90r_v1.php',
 	'brief_a'			=>  'brief_a_sr_v1.php',
-    'ped_ds8a_v2'       =>  'promise_pds8a_v2.php'
+    'ped_ds8a_v2'       =>  'promise_pds8a_v2.php',
+    'psi4_sf'           =>  'psi4_short_form.php'
 );
 
 ?>
