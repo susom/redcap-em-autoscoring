@@ -2,9 +2,9 @@
 /**
 
 	Multi-Dimensional Anxiety Scale for Children, 2nd edition
-	
+
 	A REDCap AutoScoring Algorithm File
-	
+
 	- There exists an array called $src that contains the data from the source project
 	- There can exist an optional array called $manual_result_fields that can override the default_result_fields
 	- The final results should be presented in an array called $algorithm_results
@@ -26,7 +26,7 @@ $algorithm_summary = "Multidimensional Anxiety Scale for Children, 2nd edition";
 
 # REQUIRED: Define an array of default result field_names to record the summary data
 # The MASC2 Validity Scoring Totals are:
-#   MASC2 Total Scale and MASC2 Anxiety Probability Scale 
+#   MASC2 Total Scale and MASC2 Anxiety Probability Scale
 # The clinical scales are:
 #   Total Raw Score [TR]
 #   Separation Anxiety/Phobias [SP]
@@ -191,7 +191,7 @@ $raw_results['TRAW'] = $norm_array[39] + $norm_array[40] + $raw_results['SP'] + 
 
 ### Now get the T values from the files. There are 3 different age groups and 2 genders.
 // Put together the file names
-$filepath = $data_path . 'MASC-2/';
+$filepath = $this->module->getModulePath() . '/DataFiles/MASC-2/';
 $readFile = new ReadCSVFileClass();
 
 // Create file name based on age and gender
@@ -214,32 +214,39 @@ if (!empty($filename)) {
 
     foreach ($categories as $c) {
 
-        $tscore_results[$c."_tscore"] = '';
-        $min_lookup_value = $lookup[$c][count($lookup[$c])-1];
-        $min_tscore_value = $lookup["tscore"][count($lookup[$c])-1];
+        $tscore_results[$c . "_tscore"] = '';
+
+        // Find what the minimum value is so we can set it
+        if (($c <> 'TRAW') and (!empty($lookup[$c]))) {
+            $min_lookup_value = $lookup[$c][count($lookup[$c]) - 1];
+            $min_tscore_value = $lookup["tscore"][count($lookup[$c]) - 1];
+        } else {
+            $min_lookup_value = 0;
+            $min_tscore_value = 0;
+        }
 
         if ($c == 'TRAW') {
             // TRAW is special because it has min/max values that it has to fall between
             if (!empty($lookup["TRAW_MIN"][0]) and ($raw_results[$c] >= $lookup["TRAW_MIN"][0])) {
-                $tscore_results[$c."_tscore"] = $lookup["tscore"][0];
+                $tscore_results[$c . "_tscore"] = $lookup["tscore"][0];
             } else {
-                for ($ncnt=0; $ncnt < count($lookup["TRAW_MIN"]); $ncnt++) {
+                for ($ncnt = 0; $ncnt < count($lookup["TRAW_MIN"]); $ncnt++) {
                     if (($lookup["TRAW_MIN"][$ncnt] <= $raw_results[$c]) and
                         ($raw_results[$c] <= $lookup["TRAW_MAX"][$ncnt])) {
 
-                        $tscore_results[$c."_tscore"] = $lookup["tscore"][$ncnt];
+                        $tscore_results[$c . "_tscore"] = $lookup["tscore"][$ncnt];
                         break;
                     }
                 }
             }
         } else if (($lookup[$c][0] != '') and ($raw_results[$c] >= $lookup[$c][0])) {
-            $tscore_results[$c."_tscore"] = $lookup["tscore"][0];
+            $tscore_results[$c . "_tscore"] = $lookup["tscore"][0];
         } else if (($lookup[$c][0] != '') and ($raw_results[$c] > max($lookup[$c]))) {
-            $tscore_results[$c."_tscore"] = "";
+            $tscore_results[$c . "_tscore"] = "";
         } else if (($min_lookup_value != '') and ($raw_results[$c] <= $min_lookup_value)) {
-            $tscore_results[$c."_tscore"] = $min_tscore_value;
+            $tscore_results[$c . "_tscore"] = $min_tscore_value;
         } else {
-            for ($ncnt=0; $ncnt < count($lookup[$c]); $ncnt++) {
+            for ($ncnt = 0; $ncnt < count($lookup[$c]); $ncnt++) {
                 if (($lookup[$c][$ncnt] != '') and ($raw_results[$c] == $lookup[$c][$ncnt])) {
                     $tscore_results[$c . "_tscore"] = $lookup["tscore"][$ncnt];
                     break;
